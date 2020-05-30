@@ -16,6 +16,7 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import AppModal from '../components/AppModal';
 import { AuthPage } from '../components/Authentication';
+import { Link } from 'react-router-dom';
 
 export default function PrimarySearchAppBar() {
   const classes = useStyles();
@@ -118,7 +119,15 @@ export default function PrimarySearchAppBar() {
             <MenuIcon />
           </IconButton>
           <Typography className={classes.title} variant='h6' noWrap>
-            Chewy
+            <Link
+              style={{
+                textDecoration: 'none',
+                color: 'white',
+                cursor: 'pointer',
+              }}
+              to='/recipes'>
+              Chewy
+            </Link>
           </Typography>
           <div className={classes.search}>
             <div className={classes.searchIcon}>

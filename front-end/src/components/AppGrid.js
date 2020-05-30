@@ -35,24 +35,19 @@ export default function AppGrid(props) {
         cols={2}
         cellHeight={180}
         className={classes.gridList}>
-        <GridListTile key='Subheader' cols={4} style={{ height: 'auto' }}>
-          <ListSubheader component='div' style={{ fontSize: 20 }}>
-            Recipes
-          </ListSubheader>
-        </GridListTile>
+        <GridListTile
+          key='Subheader'
+          cols={4}
+          style={{ height: 'auto' }}></GridListTile>
         {props.data.map((tile) => (
-          <GridListTile key={tile.img + Math.random()}>
+          <GridListTile
+            onClick={() => props.onClick(tile.id)}
+            key={tile.img + Math.random()}
+            style={{ cursor: 'pointer' }}>
             <img src={tile.img} alt={tile.title} />
             <GridListTileBar
               title={tile.title}
               subtitle={<span>by: {tile.author}</span>}
-              actionIcon={
-                <IconButton
-                  aria-label={`info about ${tile.title}`}
-                  className={classes.icon}>
-                  <InfoIcon />
-                </IconButton>
-              }
             />
           </GridListTile>
         ))}
