@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import UserContext from '../../context/UserContext';
 import { colors } from '../../styles';
 import { AppDrop } from '../../components/AppDrop';
 import { Input } from 'semantic-ui-react';
@@ -16,6 +17,8 @@ export const RecipeCreate = (props) => {
   // Initialize validation class
   let config = validationConfig();
   let validation = new InputValidation(config);
+
+  const { user } = useContext(UserContext);
 
   const [data, setData] = useState(ingredientData);
   const [title, setTitle] = useState(undefined);
@@ -106,72 +109,71 @@ export const RecipeCreate = (props) => {
   };
 
   const checkInputs = () => {
-    return new Promise((resolve, reject) => {
-      let newError = { ...errors };
+    let newError = { ...errors };
+    newError.isError = false;
 
-      let imageError = validation.validateInput('recipeImage', image);
-      newError.imageError = imageError;
+    let imageError = validation.validateInput('recipeImage', image);
+    newError.imageError = imageError;
+    if (imageError) newError.isError = true;
 
-      let ingredientError = validation.validateInput(
-        'recipeIngredients',
-        ingredients,
+    let ingredientError = validation.validateInput(
+      'recipeIngredients',
+      ingredients,
+    );
+    newError.ingredientError = ingredientError;
+    if (ingredientError) newError.isError = true;
+
+    let titleError = validation.validateInput('recipeTitle', title);
+    newError.titleError = titleError;
+    if (ingredientError) newError.isError = true;
+
+    let descriptionError = validation.validateInput(
+      'recipeDescription',
+      description,
+    );
+    newError.descriptionError = descriptionError;
+    if (descriptionError) newError.isError = true;
+
+    let directionsError = validation.validateInput(
+      'recipeDirections',
+      directions,
+    );
+    newError.directionsError = directionsError;
+    if (directionsError) newError.isError = true;
+
+    let newPortionError = {};
+    for (let i = 0; i < ingredients.length; i++) {
+      let portionError = validation.validateInput(
+        'recipePortion',
+        ingredients[i].portion,
       );
-      newError.ingredientError = ingredientError;
+      newPortionError[ingredients[i].id] = portionError;
+      if (portionError) newError.isError = true;
+    }
+    newError.portionError = newPortionError;
 
-      let titleError = validation.validateInput('recipeTitle', title);
-      newError.titleError = titleError;
+    let servingSizeError = validation.validateInput(
+      'recipeServingSize',
+      servingSize,
+    );
+    newError.servingSizeError = servingSizeError;
+    if (servingSizeError) newError.isError = true;
 
-      let descriptionError = validation.validateInput(
-        'recipeDescription',
-        description,
-      );
-      newError.descriptionError = descriptionError;
+    let timeToMakeError = validation.validateInput(
+      'recipeTimeToMake',
+      timeToMake,
+    );
+    newError.timeToMakeError = timeToMakeError;
+    if (timeToMakeError) newError.isError = true;
 
-      let directionsError = validation.validateInput(
-        'recipeDirections',
-        directions,
-      );
-      newError.directionsError = directionsError;
+    setErrors(newError);
 
-      let newPortionError = {};
-      for (let i = 0; i < ingredients.length; i++) {
-        let portionError = validation.validateInput(
-          'recipePortion',
-          ingredients[i].portion,
-        );
-        newPortionError[ingredients[i].id] = portionError;
-      }
-      newError.portionError = newPortionError;
-
-      let servingSizeError = validation.validateInput(
-        'recipeServingSize',
-        servingSize,
-      );
-      newError.servingSizeError = servingSizeError;
-
-      let timeToMakeError = validation.validateInput(
-        'recipeTimeToMake',
-        timeToMake,
-      );
-      newError.timeToMakeError = timeToMakeError;
-
-      setErrors(newError);
-      console.log(newError);
-
-      setTimeout(() => {
-        let keys = Object.keys(newError);
-        for (let i = 0; i < keys.length; keys++) {
-          if (newError[keys[i]]?.length > 0) {
-            resolve(true);
-          }
-        }
-        resolve(false);
-      }, 200);
-    });
+    return newError.isError;
   };
 
-  const createRecipe = async () => {
-    let isError = await checkInputs();
+  const createRecipe = () => {
+    setIsLoading(true);
+    let isError = checkInputs();
 
     if (isError) {
       toast('Please fill the required fields correctly.', {
@@ -183,6 +185,8 @@ export const RecipeCreate = (props) => {
         draggable: true,
         progress: undefined,
       });
+      setIsLoading(false);
+      return;
     }
 
     let recipe = {};
@@ -193,6 +197,8 @@ export const RecipeCreate = (props) => {
     recipe.ingredients = ingredients;
     recipe.servingSize = servingSize;
     recipe.timeToMake = timeToMake;
+    recipe.createdBy = user;
+    recipe.createdAt = Date.now().toLocaleString();
   };
 
   const renderCreateBody = () => {

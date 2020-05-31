@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import { UserProvider } from './context/UserContext';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
@@ -12,7 +13,9 @@ document.head.appendChild(styleLink);
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <UserProvider>
+      <App />
+    </UserProvider>
   </React.StrictMode>,
   document.getElementById('root'),
 );

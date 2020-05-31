@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, createContext, useEffect } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import { AppRoutes } from './routes/AppRoutes';
@@ -6,6 +6,10 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Header from './components/Header';
+import auth from './utils/auth';
+
+import jwt from 'jsonwebtoken';
+import UserContext from './context/UserContext';
 
 const theme = createMuiTheme({
   palette: {
@@ -19,6 +23,21 @@ const theme = createMuiTheme({
 });
 
 function App() {
+  useEffect(() => {
+    getUser();
+  }, []);
+
+  const contextUser = useContext(UserContext);
+
+  const getUser = () => {
+    let token = localStorage.getItem('chewyToken');
+    if (token) {
+      const userFromToken = jwt.decode(token);
+      contextUser.setUser(userFromToken?.user);
+      auth.login();
+    }
+  };
+
   return (
     <Router>
       <MuiThemeProvider theme={theme}>

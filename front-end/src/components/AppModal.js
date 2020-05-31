@@ -37,7 +37,7 @@ export default function AppModal(props) {
       aria-labelledby='simple-modal-title'
       aria-describedby='simple-modal-description'>
       <div style={modalStyle} className={classes.paper}>
-        <Children />
+        <Children onClose={props.onClose} />
       </div>
     </Modal>
   );
