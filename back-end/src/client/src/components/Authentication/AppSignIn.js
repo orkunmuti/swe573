@@ -72,7 +72,10 @@ export const AppSignIn = (props) => {
     console.log(result);
     if (result.status === 200) {
       result = await result.json();
+
       const userFromToken = jwt.decode(result.token);
+      axios.defaults.headers.common.Authorization = `Bearer ${result.token}`;
+
       contextUser.setUser(userFromToken.user);
       contextUser.setToken(result.token);
       auth.login();

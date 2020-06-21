@@ -198,6 +198,7 @@ const updateRecipe = async (req, res, next) => {
           .transacting(trx);
       }
     });
+    res.status(200).send('Recipe update is successful.');
   } catch (error) {
     console.log(error);
     res.status(400).send(error);
