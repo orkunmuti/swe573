@@ -18,7 +18,6 @@ import { axiosWithAuth } from '../../utils/axiosWithAuth';
 import axios from 'axios';
 import { responsiveFontSizes } from '@material-ui/core';
 import debounce from 'lodash.debounce';
-import FilterResults from 'react-filter-search';
 import AppModal from '../../components/AppModal';
 import SearchField from 'react-search-field';
 import FlatList from 'flatlist-react';
