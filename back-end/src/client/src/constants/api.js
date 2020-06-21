@@ -1,4 +1,4 @@
-const api = 'api/';
+const api = '/api/';
 
 const url = {
   signin: api + 'signin',

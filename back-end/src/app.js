@@ -1,6 +1,7 @@
 const express = require('express');
 const api = require('./api');
 const app = express();
+const path = require('path');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -11,12 +12,15 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use('/api', api);
 
-// TODO: move all controllers in the src/api/controllers folder
-app.get('/', (req, res) => {
-  res.send({
-    message: 'Hello from the API',
+if (process.env.NODE_ENV === 'production') {
+  // Serve any static files
+  app.use(express.static(path.join(__dirname, 'client/build')));
+
+  // Handle React routing, return all requests to React app
+  app.get('*', function (req, res) {
+    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
   });
-});
+}
 
 app.listen(port, () =>
   console.log(

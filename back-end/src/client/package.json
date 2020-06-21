@@ -2,7 +2,7 @@
   "name": "foodstore-frontend",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:80/",
+  "proxy": "http://localhost:80",
   "dependencies": {
     "@material-ui/core": "^4.10.0",
     "@material-ui/icons": "^4.9.1",

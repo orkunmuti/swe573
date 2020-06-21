@@ -46,6 +46,6 @@ recipeRouter.get('/ingredients/:id', authenticateToken, getIngredient);
 recipeRouter.post('/ingredients', authenticateToken, searchIngredient);
 
 // CALCULATE NUTRIENTS
-recipeRouter.post('/nutrients', authenticateToken, calculateNutrients);
+recipeRouter.post('/nutrients', calculateNutrients);
 
 module.exports = recipeRouter;
