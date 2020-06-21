@@ -1,19 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import AppGrid from '../../components/AppGrid';
 import AppPagination from '../../components/AppPagination';
-import { recipeDetailData } from '../../assets/recipeDetailData';
 import AddIcon from '@material-ui/icons/AddCircleRounded';
 import { Link } from 'react-router-dom';
 import { colors } from '../../styles';
+import axios from 'axios';
+import api from '../../constants/api';
+import toBase64 from '../../utils/toBase64';
 
 export const RecipeList = (props) => {
   const [recipeData, setRecipeData] = useState([]);
   const classes = useStyles();
 
+  useEffect(() => {
+    getRecipes();
+  }, []);
+
+  const getRecipes = async () => {
+    let recipes = await axios.get(api.getRecipes);
+    setRecipeData(recipes.data);
+  };
+
   const handleGridClick = (id) => {
-    const dataToPass = recipeDetailData.filter((data) => data.id === id);
+    const dataToPass = recipeData.filter((data) => data.id === id);
     props.history.push(`${props.location.pathname}/` + id, {
       data: dataToPass,
     });
@@ -24,9 +35,9 @@ export const RecipeList = (props) => {
       <div style={styles.headerContainer}>
         <div style={styles.headerContainerChild}>Recipes</div>
         <Link to='/recipes/create'>
-          <button class='ui left labeled icon button'>
+          <button className='ui left labeled icon button'>
             Create
-            <i class='plus icon' style={{ color: colors.orange }}></i>
+            <i className='plus icon' style={{ color: colors.orange }}></i>
           </button>
         </Link>
       </div>
@@ -41,7 +52,7 @@ export const RecipeList = (props) => {
       <div style={styles.paginationContainer}>
         <AppPagination
           className={classes.pagination}
-          data={recipeDetailData}
+          data={recipeData}
           updateData={setRecipeData}
         />
       </div>

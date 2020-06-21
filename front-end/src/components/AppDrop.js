@@ -4,8 +4,6 @@ import ImageIcon from '@material-ui/icons/ImageRounded';
 import Button from '@material-ui/core/Button';
 
 export const AppDrop = (props) => {
-  const [image, setImage] = useState(null);
-
   const uploadImage = (files) => {
     // Assuming only image
     var file = files[0];
@@ -13,18 +11,16 @@ export const AppDrop = (props) => {
     var url = reader.readAsDataURL(file);
 
     reader.onloadend = function (e) {
-      setImage(reader.result);
       props.onChange(reader.result);
     };
   };
 
   const removeImage = () => {
-    setImage(null);
     props.onChange(null);
   };
 
   return (
-    <div style={!image ? props.dropStyle : props.imgStyle}>
+    <div style={!props.image ? props.dropStyle : props.imgStyle}>
       <FileDrop
         style={{
           textAlign: 'center',
@@ -32,7 +28,7 @@ export const AppDrop = (props) => {
           justifyContent: 'center',
         }}
         onDrop={(files) => uploadImage(files)}>
-        {!image ? (
+        {!props.image ? (
           <div
             style={{
               display: 'flex',
@@ -45,7 +41,7 @@ export const AppDrop = (props) => {
           </div>
         ) : (
           <div>
-            <img style={props.imgStyle} src={image} />
+            <img style={props.imgStyle} src={props.image} />
             <Button
               onClick={() => removeImage()}
               style={{ float: 'right' }}

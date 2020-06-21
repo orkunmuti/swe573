@@ -31,7 +31,8 @@ const difficultyOptions = [
   { value: 'Hard', label: 'Hard' },
 ];
 
-export const RecipeCreate = (props) => {
+export const RecipeEdit = (props) => {
+  const propData = props.location.state.data;
   const { user } = useContext(UserContext);
 
   const [data, setData] = useState(ingredientData);
@@ -40,6 +41,7 @@ export const RecipeCreate = (props) => {
   const [description, setDescription] = useState(undefined);
   const [searchInput, setSearchInput] = useState(undefined);
   const [ingredients, setIngredients] = useState([]);
+  const [nutrients, setNutrients] = useState([]);
   const [directions, setDirections] = useState();
   const [servingSize, setServingSize] = useState(undefined);
   const [timeToMake, setTimeToMake] = useState(undefined);
@@ -48,6 +50,7 @@ export const RecipeCreate = (props) => {
   const [hasMoreData, setHasMoreData] = useState(false);
   const [showNutrition, setShowNutrition] = useState(false);
   const [difficulty, setDifficulty] = useState('Easy');
+  const [editorDefault, setEditorDefault] = useState(undefined);
 
   const [errors, setErrors] = useState({
     imageError: null,
@@ -62,6 +65,34 @@ export const RecipeCreate = (props) => {
   // Initialize validation class
   let config = validationConfig();
   let validation = new InputValidation(config);
+
+  const initializeData = () => {
+    const {
+      title,
+      image,
+      description,
+      ingredients,
+      directions,
+      servingSize,
+      timeToMake,
+      difficulty,
+    } = propData;
+    console.log(propData);
+
+    setTitle(title);
+    setImage(image);
+    setDescription(description);
+    setIngredients(ingredients);
+    setDirections(directions);
+    setServingSize(servingSize);
+    setTimeToMake(timeToMake);
+    setDifficulty(difficulty);
+    setEditorDefault(directions);
+  };
+
+  useEffect(() => {
+    initializeData();
+  }, []);
 
   const searchInputChange = (input) => {
     if (input.trim() === '') {
@@ -234,16 +265,13 @@ export const RecipeCreate = (props) => {
 
     let objectToSend = { searchArray, dataToSend };
 
-    let updatedIngredients = [...ingredients];
-
     let result = await axios
       .post(api.calculateNutrients, {
         objectToSend,
       })
       .then((res) => {
         if (res.status === 200) {
-          updatedIngredients.nutrients = res.data;
-          setIngredients(updatedIngredients);
+          setNutrients(res.data);
           setShowNutrition(true);
         }
       });
@@ -312,7 +340,7 @@ export const RecipeCreate = (props) => {
     return newError.isError;
   };
 
-  const createRecipe = async () => {
+  const editRecipe = async () => {
     let isError = checkInputs();
 
     if (isError) {
@@ -327,6 +355,7 @@ export const RecipeCreate = (props) => {
       });
       return;
     }
+    console.log(user);
 
     let recipe = {};
     recipe.createdBy = user.id;
@@ -341,9 +370,11 @@ export const RecipeCreate = (props) => {
     recipe.creatorName = `${user.name} ${user.surname}`;
 
     try {
-      let result = await axios.post(api.createRecipe, { recipe });
+      let result = await axios.put(api.updateRecipe + '/' + propData.id, {
+        recipe,
+      });
       if (result.status === 200) {
-        toast.success('Recipe has been created successfully.');
+        toast.success('Recipe has been updated successfully.');
 
         props.history.push('/recipes');
       }
@@ -366,12 +397,12 @@ export const RecipeCreate = (props) => {
 
     return (
       <div style={styles.recipeDetailContainer}>
-        <div style={styles.mainHeader}>Create Recipe</div>
+        <div style={styles.mainHeader}>Edit Recipe</div>
         <AppDrop
-          image={image}
           dropStyle={styles.dropImage}
           imgStyle={styles.recipeImage}
           onChange={setImage}
+          image={image}
         />
         {imageError && <div style={styles.errorText}>{imageError}</div>}
 
@@ -399,6 +430,7 @@ export const RecipeCreate = (props) => {
         <div style={styles.subHeader}>Directions</div>
         <div style={{ width: '100%' }}>
           <AppEditor
+            defaultValue={editorDefault}
             editorState={''}
             onChange={handleDirectionsUpdate}
             placeholder={'Tell about your recipe directions...'}
@@ -540,8 +572,8 @@ export const RecipeCreate = (props) => {
               style={styles.unitSelect}
               options={difficultyOptions}
               placeholder='difficulty'
-              value={difficulty}
-              onChange={(e) => setDifficulty(e)}
+              value={{ label: difficulty, value: difficulty }}
+              onChange={(e) => setDifficulty(e.value)}
             />
           </div>
         </div>
@@ -560,19 +592,17 @@ export const RecipeCreate = (props) => {
         </div>
 
         <button
-          onClick={() => createRecipe()}
+          onClick={() => editRecipe()}
           className='positive large ui button'
           style={{ alignSelf: 'flex-start', marginTop: '2rem' }}>
-          Create Recipe
+          Save
         </button>
       </div>
     );
   };
 
   const renderModal = () => {
-    let [energy] = ingredients.nutrients.filter(
-      (item) => item.unitName === 'KCAL',
-    );
+    let [energy] = nutrients.filter((item) => item.unitName === 'KCAL');
     energy = energy?.amount;
 
     let servePerNutrient = servingSize ? parseFloat(servingSize) : 1;
@@ -655,8 +685,8 @@ export const RecipeCreate = (props) => {
                 borderColor: 'lightgray',
               }}
             />
-            {ingredients.nutrients
-              ? ingredients.nutrients.map((item) => {
+            {nutrients
+              ? nutrients.map((item) => {
                   return (
                     <div
                       style={{

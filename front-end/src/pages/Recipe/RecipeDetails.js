@@ -1,30 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import UserContext from '../../context/UserContext';
 import AppRating from '../../components/AppRating';
 import Avatar from '@material-ui/core/Avatar';
 import { colors } from '../../styles';
 import TimeLapse from '@material-ui/icons/TimelapseRounded';
 import PieChart from '@material-ui/icons/PieChartRounded';
 import BarChart from '@material-ui/icons/BarChartRounded';
-import FastFood from '@material-ui/icons/AddCircleRounded';
-import AppComment from '../../components/AppComment';
+import FastFood from '@material-ui/icons/Restaurant';
+import AppModal from '../../components/AppModal';
+import Interweave from 'interweave';
+import axios from 'axios';
+import api from '../../constants/api';
+// import AppComment from '../../components/AppComment';
 
 export const RecipeDetails = (props) => {
   const data = props.location.state.data[0];
+  const { user } = useContext(UserContext);
+
+  const [showNutrition, setShowNutrition] = useState(false);
+  const [nutrients, setNutrients] = useState([]);
+  const [canEdit, setCanEdit] = useState(false);
+
+  useEffect(() => {
+    if (user?.id === parseInt(data.createdBy)) {
+      setCanEdit(true);
+    }
+  }, [user]);
+
+  const calculateNutrients = async () => {
+    let dataToSend = {};
+    let searchArray = [];
+
+    const { ingredients } = data;
+
+    ingredients.forEach(({ id, unitValue, portion }) => {
+      if (portion < 0 || isNaN(portion)) {
+        return;
+      }
+      dataToSend[id] = unitValue * portion;
+      searchArray.push(id);
+    });
+    let objectToSend = { searchArray, dataToSend };
+
+    await axios
+      .post(api.calculateNutrients, {
+        objectToSend,
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          setNutrients(res.data);
+          setShowNutrition(true);
+        }
+      });
+  };
+
+  const editRecipe = () => {
+    props.history.push(`${props.location.pathname}/` + 'edit', {
+      data: data,
+    });
+  };
 
   const renderRecipeDetails = () => {
     return (
       <div style={styles.recipeDetailContainer}>
-        <img style={styles.recipeImage} src={data.img} />
+        <img style={styles.recipeImage} src={data.image} />
         <div style={styles.recipeTitle}>{data.title}</div>
-        <AppRating style={styles.recipeRating} rating={data.rating} />
+        {/* <AppRating style={styles.recipeRating} rating={data.rating} /> */}
         {renderSubDetails(data)}
         {renderShortDescription(data)}
         {renderIngredients(data)}
         {renderDirections(data)}
-        {renderNutrionFacts(data)}
 
         <br style={{ height: '1rem', backgroundColor: 'white' }} />
-        {renderComments()}
+        {renderBottom()}
+        {/* {renderComments()} */}
       </div>
     );
   };
@@ -34,7 +83,9 @@ export const RecipeDetails = (props) => {
       <div style={styles.shortDescGrid}>
         <Avatar style={styles.avatarGrid} src={data.avatar} />
         <div>
-          <span style={{ color: colors.subHeader }}>Recipe by : </span>
+          <span style={{ color: colors.subHeader }}>
+            Recipe by : {data.creatorName}
+          </span>
           {data.author}
         </div>
         <div style={styles.recipeDesc}>{data.description}</div>
@@ -46,15 +97,15 @@ export const RecipeDetails = (props) => {
     return (
       <div style={styles.subDetailsParent}>
         <div style={styles.subDetailsChildren}>
-          <div>{data.timetomake} mins</div>
+          <div>{data.timeToMake} mins</div>
           <TimeLapse style={styles.subDetailIcon} />
         </div>
         <div style={styles.subDetailsChildren}>
-          <div>{data.servingsize} serving</div>
+          <div>{data.servingSize} serving</div>
           <PieChart style={styles.subDetailIcon}></PieChart>
         </div>
         <div style={styles.subDetailsChildren}>
-          <div>{data.calories} cals</div>
+          <div>{data.difficulty}</div>
           <BarChart style={styles.subDetailIcon}></BarChart>
         </div>
       </div>
@@ -62,13 +113,17 @@ export const RecipeDetails = (props) => {
   };
 
   const renderIngredients = (data) => {
+    const { ingredients } = data;
     return (
       <div style={styles.ingredientsContainer}>
         <div style={styles.subHeader}>Ingredients</div>
-        {data.ingredients.map((ingredient) => (
-          <div style={styles.ingredientItem}>
+        {ingredients.map((ingredient) => (
+          <div style={styles.ingredientItem} key={ingredient.id}>
             <FastFood style={styles.ingredientIcon} />
-            <div style={styles.ingredientDesc}>{ingredient}</div>
+            <div style={styles.ingredientDesc}>
+              {ingredient.description} -{' '}
+              {ingredient.portion * ingredient.unitValue} g
+            </div>
           </div>
         ))}
       </div>
@@ -76,37 +131,189 @@ export const RecipeDetails = (props) => {
   };
 
   const renderDirections = (data) => {
+    let directions = data.directions.replace(/\\n/g, '');
+    directions = directions.replace(/(^|[^\\])(\\\\)*\\$/, '$&\\');
+    directions = directions.replace(/\n/g, '');
     return (
       <div style={styles.directionsContainer}>
         <div style={styles.subHeader}>Directions</div>
-        <div>{data.directions}</div>
+        <Interweave content={directions} />
       </div>
     );
   };
 
-  const renderNutrionFacts = (data) => {
+  const renderBottom = () => {
     return (
-      <div style={styles.nutritionsContainer}>
-        <div style={styles.subHeader}>Nutrition facts</div>
-        {data.nutrition.map((nutrition) => (
-          <div style={styles.ingredientItem}>
-            <FastFood style={styles.ingredientIcon} />
-            <div style={styles.ingredientDesc}>{nutrition}</div>
+      <div
+        style={{
+          display: 'flex',
+          alignSelf: 'flex-start',
+          marginTop: '2rem',
+          flexDirection: 'row',
+          width: '100%',
+          alignItems: 'center',
+        }}>
+        <div
+          onClick={() => calculateNutrients()}
+          style={{
+            fontSize: '1.1rem',
+            color: colors.primary,
+            cursor: 'pointer',
+            textDecoration: 'underline',
+          }}>
+          Show Nutrition Facts
+        </div>
+        {canEdit && (
+          <button
+            onClick={() => editRecipe()}
+            key={canEdit}
+            className='positive large ui button'
+            style={{
+              float: 'right',
+              alignSelf: 'flex-end',
+              marginLeft: 'auto',
+            }}>
+            Edit Recipe
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  const renderModal = () => {
+    const { servingSize } = data;
+    let [energy] = nutrients.filter((item) => item.unitName === 'KCAL');
+    energy = energy?.amount;
+
+    let servePerNutrient = servingSize ? parseFloat(servingSize) : 1;
+
+    const calculatePerPerson = (nutrient) => {
+      let nutrientValue = parseFloat(nutrient);
+      nutrientValue = nutrientValue / servePerNutrient;
+      nutrientValue = nutrientValue.toFixed(6);
+      return nutrientValue;
+    };
+
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+        <i
+          onClick={() => setShowNutrition(false)}
+          className='window close outline icon '
+          style={{
+            fontSize: '1rem',
+            alignSelf: 'flex-end',
+            marginBottom: '1rem',
+            cursor: 'pointer',
+            fontWeight: 'lighter',
+          }}
+        />
+        <div
+          style={{
+            fontFamily: 'Source sans pro',
+            display: 'flex',
+            alignItems: 'flex-start',
+            flexDirection: 'column',
+            borderWidth: '0.05rem',
+            borderColor: 'lightgray',
+            borderStyle: 'solid',
+            padding: '1rem',
+          }}>
+          <div
+            style={{
+              fontSize: '2rem',
+              lineHeight: '2.2rem',
+              letterSpacing: '0.1rem',
+            }}>
+            <div>Nutritional</div>
+            <div>Information</div>
           </div>
-        ))}
+          <div style={{ marginTop: '1rem' }}>{data.title}</div>
+          <div style={{ marginTop: '0.5rem' }}>
+            <div
+              style={{
+                fontSize: '0.6rem',
+                fontWeight: 'bold',
+              }}>
+              Serving size:{' '}
+              <span style={{ fontWeight: 'lighter' }}>{servePerNutrient}</span>
+            </div>
+            <div
+              style={{
+                fontSize: '0.6rem',
+                fontWeight: 'bold',
+              }}>
+              Total calories:
+              <span style={{ fontWeight: 'lighter' }}> {energy} KCAL</span>
+            </div>
+            <div
+              style={{
+                fontSize: '0.6rem',
+                fontWeight: 'bold',
+                marginTop: 5,
+              }}>
+              Nutrients per size
+            </div>
+            <div
+              style={{
+                backgroundColor: 'lightgray',
+                borderWidth: '0.05rem',
+                borderStyle: 'solid',
+                borderColor: 'lightgray',
+              }}
+            />
+            {nutrients
+              ? nutrients.map((item) => {
+                  return (
+                    <div
+                      style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 'bold',
+                      }}>
+                      {item.name} :{' '}
+                      <span style={{ fontWeight: 'lighter' }}>
+                        {calculatePerPerson(item.amount)} {item.unitName}
+                      </span>
+                      <div
+                        style={{
+                          borderWidth: '0.01rem',
+                          borderStyle: 'solid',
+                          borderColor: 'lightgray',
+                        }}
+                      />
+                    </div>
+                  );
+                })
+              : null}
+          </div>
+        </div>
       </div>
     );
   };
 
-  const renderComments = () => {
-    return (
-      <div style={styles.commentsParentContainer}>
-        <AppComment />
-      </div>
-    );
-  };
+  // const renderComments = () => {
+  //   return (
+  //     <div style={styles.commentsParentContainer}>
+  //       <AppComment />
+  //     </div>
+  //   );
+  // };
 
-  return <div style={styles.mainContainer}>{renderRecipeDetails()}</div>;
+  return (
+    <div style={styles.mainContainer}>
+      {renderRecipeDetails()}{' '}
+      <div>
+        <AppModal
+          open={showNutrition}
+          onClose={() => setShowNutrition(false)}
+          component={renderModal}
+        />
+      </div>
+    </div>
+  );
 };
 
 const styles = {
@@ -127,15 +334,18 @@ const styles = {
     width: '60%',
     margin: 'auto 0',
     // backgroundColor: colors.background,
-    backgroundColor: '#FAFAFA',
+    // backgroundColor: '#FAFAFA',
     height: '100%',
     padding: '1rem',
   },
   recipeImage: {
     alignSelf: 'flex-center',
+    height: '20rem',
+    overflow: 'hidden',
+    width: '20rem',
   },
   recipeTitle: {
-    marginTop: '1rem',
+    marginTop: '1.5rem',
     fontSize: 30,
     letterSpacing: '1px',
   },
@@ -148,6 +358,7 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
     color: 'gray',
+    marginTop: '1.5rem',
   },
   subDetailsChildren: {
     display: 'flex',
@@ -178,13 +389,14 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignSelf: 'flex-start',
+    marginTop: '1.5rem',
   },
   subHeader: {
     fontSize: '25px',
     alignSelf: 'flex-start',
     letterSpacing: '1px',
     color: 'gray',
-    marginBottom: '0.5rem',
+    marginBottom: '1rem',
   },
   ingredientItem: {
     display: 'flex',
@@ -201,7 +413,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignSelf: 'flex-start',
-    marginTop: '1rem',
+    marginTop: '1.5rem',
   },
   nutritionsContainer: {
     display: 'flex',

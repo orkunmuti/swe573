@@ -25,8 +25,8 @@ import validationConfig from '../../utils/validationConfig';
 export const AppSignIn = (props) => {
   const classes = useStyles();
   const [user, setUser] = useState({
-    email: 'vadersama@gmail.com',
-    password: '123456',
+    email: '',
+    password: '',
   });
 
   let config = validationConfig();

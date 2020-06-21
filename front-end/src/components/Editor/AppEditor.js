@@ -11,23 +11,11 @@ import {
   convertFromHTML,
 } from 'draft-js';
 
-// const blocksFromHTML = convertFromHTML(
-//   '<p>Hey this <strong>editor</strong> rocks 😀</p>',
-// );
-
-// const content = ContentState.createFromBlockArray(
-//   blocksFromHTML.contentBlocks,
-//   blocksFromHTML.entityMap,
-// );
-
-// const revisedState = EditorState.createWithContent(content)
-
 class AppEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = { editorState: EditorState.createEmpty() };
 
-    this.focus = () => this.refs.editor.focus();
     this.onChange = (editorState) => {
       this.props.onChange(editorState);
       this.setState({ editorState });
@@ -37,6 +25,25 @@ class AppEditor extends React.Component {
     this.onTab = (e) => this._onTab(e);
     this.toggleBlockType = (type) => this._toggleBlockType(type);
     this.toggleInlineStyle = (style) => this._toggleInlineStyle(style);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.defaultValue !== prevProps.defaultValue) {
+      let newProps = this.props.defaultValue.replace(/\\n/g, '');
+      this.initializeData(newProps);
+    }
+  }
+
+  initializeData(newState) {
+    const blocksFromHTML = convertFromHTML(newState);
+    const content = ContentState.createFromBlockArray(
+      blocksFromHTML.contentBlocks,
+      blocksFromHTML.entityMap,
+    );
+
+    const revisedState = EditorState.createWithContent(content);
+    console.log(revisedState);
+    this.setState({ editorState: revisedState });
   }
 
   _handleKeyCommand(command) {
@@ -87,7 +94,7 @@ class AppEditor extends React.Component {
           editorState={editorState}
           onToggle={this.toggleInlineStyle}
         />
-        <div className={className} onClick={this.focus}>
+        <div className={className}>
           <Editor
             blockStyleFn={getBlockStyle}
             customStyleMap={styleMap}
@@ -96,7 +103,6 @@ class AppEditor extends React.Component {
             onChange={this.onChange}
             onTab={this.onTab}
             placeholder={this.props.placeholder}
-            ref='editor'
             spellCheck={true}
           />
         </div>

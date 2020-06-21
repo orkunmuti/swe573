@@ -7,6 +7,7 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 import tileData from '../assets/tileData';
+import toBase64 from '../utils/toBase64';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -41,13 +42,13 @@ export default function AppGrid(props) {
           style={{ height: 'auto' }}></GridListTile>
         {props.data.map((tile) => (
           <GridListTile
+            key={tile.id}
             onClick={() => props.onClick(tile.id)}
-            key={tile.img + Math.random()}
             style={{ cursor: 'pointer' }}>
-            <img src={tile.img} alt={tile.title} />
+            <img src={tile.image} />
             <GridListTileBar
               title={tile.title}
-              subtitle={<span>by: {tile.author}</span>}
+              subtitle={<span>by: {tile.createdBy}</span>}
             />
           </GridListTile>
         ))}

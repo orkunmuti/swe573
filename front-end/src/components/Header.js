@@ -21,10 +21,12 @@ import UserContext from '../context/UserContext';
 import { toast } from 'react-toastify';
 import auth from '../utils/auth';
 import { useHistory } from 'react-router-dom';
+import AppDrawer from '../components/AppDrawer';
 
 export default function Header() {
   const classes = useStyles();
   const [isModalOpen, setModalOpen] = useState(false);
+  const [drawerVisibility, setDrawerVisibility] = useState(false);
   let isOnAuthPage = false;
 
   let history = useHistory();
@@ -62,11 +64,16 @@ export default function Header() {
     }
   };
 
+  const handleDrawerVisibility = (visibility) => {
+    setDrawerVisibility(visibility);
+  };
+
   return (
     <div className={classes.grow}>
       <AppBar position='static'>
         <Toolbar>
           <IconButton
+            onClick={() => handleDrawerVisibility(true)}
             edge='start'
             className={classes.menuButton}
             color='inherit'
@@ -95,7 +102,9 @@ export default function Header() {
                 onClick={handleAuthClick}
                 color='inherit'>
                 <i
-                  class={contextUser.user ? 'sign out icon' : 'sign out icon'}
+                  className={
+                    contextUser.user ? 'sign out icon' : 'sign out icon'
+                  }
                 />
                 <Link to='/signin' style={{ color: 'white' }}>
                   <span style={{ fontSize: '1rem', marginLeft: '0.5rem' }}>
@@ -106,6 +115,10 @@ export default function Header() {
             </div>
           )}
         </Toolbar>
+        <AppDrawer
+          isOpen={drawerVisibility}
+          toggleDrawer={handleDrawerVisibility}
+        />
       </AppBar>
     </div>
   );

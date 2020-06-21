@@ -10,6 +10,10 @@ import auth from './utils/auth';
 
 import jwt from 'jsonwebtoken';
 import UserContext from './context/UserContext';
+import axios from 'axios';
+
+let token = localStorage.getItem('chewyToken');
+axios.defaults.headers.common.Authorization = `Bearer ${token}`;
 
 const theme = createMuiTheme({
   palette: {

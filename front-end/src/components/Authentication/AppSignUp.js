@@ -22,10 +22,10 @@ export const AppSignUp = (props) => {
   const classes = useStyles();
 
   const [user, setUser] = useState({
-    name: 'Orkun',
-    surname: 'Muti',
-    email: 'vadersama@gmail.com',
-    password: '123456',
+    name: '',
+    surname: '',
+    email: '',
+    password: '',
   });
 
   let config = validationConfig();
