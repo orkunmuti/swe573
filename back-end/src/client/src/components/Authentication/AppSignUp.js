@@ -71,7 +71,7 @@ export const AppSignUp = (props) => {
     const isError = checkInputs();
     if (isError) return;
 
-    let result = await fetch(url.signin, {
+    let result = await fetch(url.signup, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -81,7 +81,7 @@ export const AppSignUp = (props) => {
     });
     if (result.status === 200) {
       result = await result.json();
-      props.history.push('/signup');
+      props.history.push('/signin');
 
       toast('You have successfully signed up.', {
         position: 'bottom-center',
