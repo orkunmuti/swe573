@@ -81,7 +81,7 @@ export const AppSignUp = (props) => {
     });
     if (result.status === 200) {
       result = await result.json();
-      props.history.push('/signin');
+      props.history.push('/signup');
 
       toast('You have successfully signed up.', {
         position: 'bottom-center',
