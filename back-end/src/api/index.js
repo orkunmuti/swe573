@@ -5,18 +5,11 @@ const recipeRouter = require('./routes/recipeRouter');
 const jwt = require('jsonwebtoken');
 
 const bodyParser = require('body-parser');
-api.use(bodyParser.urlencoded({ extended: false }));
-api.use(bodyParser.json());
+api.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
+api.use(bodyParser.json({ limit: '50mb' }));
 
 // Add routes
 api.use(authRouter);
 api.use(recipeRouter);
-
-// TODO: move all controllers in the src/api/controllers folder
-api.get('/', (req, res) => {
-  res.send({
-    message: 'Hello from the API',
-  });
-});
 
 module.exports = api;

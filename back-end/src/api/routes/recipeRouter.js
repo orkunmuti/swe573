@@ -9,6 +9,7 @@ const {
   createComment,
   updateComment,
   deleteComment,
+  getIngredient,
   searchIngredient,
   calculateNutrients,
 } = require('../controllers/recipeController');
@@ -38,17 +39,13 @@ recipeRouter.put('/recipes/comments/:id', authenticateToken, updateComment);
 // DELETE RECIPE COMMENT
 recipeRouter.put('/recipes/comments/:id', authenticateToken, deleteComment);
 
+// GET INGREDIENT
+recipeRouter.get('/ingredients/:id', authenticateToken, getIngredient);
+
 // SEARCH INGREDIENT
 recipeRouter.post('/ingredients', authenticateToken, searchIngredient);
 
-// GET INGREDIENT
-recipeRouter.get(
-  '/recipes/ingredients/:id',
-  authenticateToken,
-  searchIngredient,
-);
-
 // CALCULATE NUTRIENTS
-recipeRouter.post('/recipes/nutrients', authenticateToken, calculateNutrients);
+recipeRouter.post('/nutrients', authenticateToken, calculateNutrients);
 
 module.exports = recipeRouter;
