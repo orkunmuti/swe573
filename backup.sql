@@ -108,7 +108,7 @@ ALTER TABLE public.recipes ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 CREATE TABLE public.user_allergy (
     user_id smallint NOT NULL,
-    ingredient_id smallint NOT NULL
+    allergy character varying
 );
 
 
@@ -135,10 +135,11 @@ CREATE TABLE public.users (
     name character varying(100),
     surname character varying(100),
     city character varying(50),
-    country character varying(50),
+    state character varying(50),
     password character varying(100) NOT NULL,
-    food_provider boolean,
-    email character varying NOT NULL
+    food_provider boolean DEFAULT false,
+    email character varying NOT NULL,
+    image text
 );
 
 
@@ -194,7 +195,7 @@ COPY public.recipes (id, created_by, title, directions, serving_size, time_to_ma
 -- Data for Name: user_allergy; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.user_allergy (user_id, ingredient_id) FROM stdin;
+COPY public.user_allergy (user_id, allergy) FROM stdin;
 \.
 
 
@@ -210,7 +211,7 @@ COPY public.user_comment (user_id, comment_id) FROM stdin;
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (id, name, surname, city, country, password, food_provider, email) FROM stdin;
+COPY public.users (id, name, surname, city, state, password, food_provider, email, image) FROM stdin;
 \.
 
 
@@ -218,14 +219,14 @@ COPY public.users (id, name, surname, city, country, password, food_provider, em
 -- Name: recipes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.recipes_id_seq', 64, true);
+SELECT pg_catalog.setval('public.recipes_id_seq', 168, true);
 
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 31, true);
+SELECT pg_catalog.setval('public.users_id_seq', 34, true);
 
 
 --
@@ -258,14 +259,6 @@ ALTER TABLE ONLY public.recipe_ingredients
 
 ALTER TABLE ONLY public.recipes
     ADD CONSTRAINT recipes_pkey PRIMARY KEY (id);
-
-
---
--- Name: user_allergy user_allergy_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.user_allergy
-    ADD CONSTRAINT user_allergy_pkey PRIMARY KEY (user_id, ingredient_id);
 
 
 --
