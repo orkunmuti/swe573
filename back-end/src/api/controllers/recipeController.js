@@ -1,4 +1,7 @@
 const knex = require('../../configuration/dbConnection');
+const fs = require('fs');
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 const SqlString = require('sqlstring');
 const {
   getFoodAPI,
@@ -6,8 +9,23 @@ const {
   getFoodNutrientsAPI,
 } = require('../utils/fetchUsda');
 const { conversions } = require('../constants/conversions');
-const { toBase64 } = require('../utils/toBase64');
 require('dotenv').config();
+
+const toBase64 = async (file) => {
+  let a = file === null;
+  if (file === null || file === '') {
+    return;
+  } else {
+    return new Promise((resolve, reject) => {
+      fs.readFile(file, { encoding: 'base64' }, (err, data) => {
+        if (err) {
+          reject();
+        }
+        resolve(data);
+      });
+    });
+  }
+};
 
 const createRecipe = async (req, res, next) => {
   const { recipe } = req.body;
@@ -29,9 +47,20 @@ const createRecipe = async (req, res, next) => {
   escapedDirections = escapedDirections.replace(/\\n/g, '');
   escapedDirections = escapedDirections.replace(/\n/g, '');
 
+  let base64Image = image.split(';base64,').pop();
+  let imagePath = path.join(__dirname, '../../public/images/');
+  let imageName = uuidv4() + '.png';
+  imagePath = imagePath + imageName;
+
+  await fs.writeFile(imagePath, base64Image, { encoding: 'base64' }, function (
+    err,
+  ) {
+    fileName = imagePath;
+  });
+
   let newRecipe = {
     createdBy,
-    image,
+    image: imageName,
     title,
     description,
     directions: escapedDirections,
@@ -100,6 +129,11 @@ const updateRecipe = async (req, res, next) => {
     creatorName,
   } = recipe;
 
+  if (req.user.user.id !== Number(createdBy)) {
+    res.status(400).send('Not authorized');
+    return;
+  }
+
   let escapedDirections = SqlString.escape(directions);
   escapedDirections = escapedDirections.replace(/(^|[^\\])(\\\\)*\\$/, '$&\\');
   escapedDirections = escapedDirections.replace(/\\n/g, '');
@@ -107,7 +141,6 @@ const updateRecipe = async (req, res, next) => {
 
   let newRecipe = {
     createdBy,
-    image,
     title,
     description,
     directions: escapedDirections,
@@ -117,6 +150,33 @@ const updateRecipe = async (req, res, next) => {
     creatorName,
   };
   newRecipe.updatedAt = new Date();
+
+  let [dbRecipe] = await knex('recipes').where('id', recipeId);
+
+  if (image && image !== '' && image !== dbRecipe.image) {
+    let imagePath = path.join(__dirname, '../../public/images/');
+    let oldImage;
+    if (dbRecipe.image !== null && dbRecipe.image !== '') {
+      oldImage = await toBase64(imagePath + dbRecipe.image);
+    }
+    let userImage = image.split(',')[1];
+    if (userImage === oldImage) {
+      newRecipe.image = dbRecipe.image;
+    } else {
+      let imageName = uuidv4() + '.png';
+      imagePath = imagePath + imageName;
+      newRecipe.image = imageName;
+
+      await fs.writeFile(
+        imagePath,
+        userImage,
+        { encoding: 'base64' },
+        function (err) {
+          console.log('image written');
+        },
+      );
+    }
+  }
 
   let newIngredients = ingredients.map(
     ({ id, description, portion, unitValue, unitLabel }) => ({
@@ -216,6 +276,7 @@ const getRecipe = async (req, res, next) => {
 const getRecipes = async (req, res, next) => {
   try {
     let recipes = await knex('recipes');
+    console.log(recipes.length);
 
     for (let i = 0; i < recipes.length; i++) {
       let recipe = recipes[i];
@@ -366,6 +427,11 @@ const calculateNutrients = async (req, res, next) => {
   res.send(result);
 };
 
+const getImages = async (req, res, next) => {
+  let imageName = req.params.id;
+  res.sendFile(path.join(__dirname, '../../public/images', imageName));
+};
+
 module.exports = {
   createRecipe,
   updateRecipe,
@@ -378,4 +444,5 @@ module.exports = {
   getIngredient,
   searchIngredient,
   calculateNutrients,
+  getImages,
 };

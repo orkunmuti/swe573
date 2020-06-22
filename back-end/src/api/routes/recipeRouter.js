@@ -12,6 +12,7 @@ const {
   getIngredient,
   searchIngredient,
   calculateNutrients,
+  getImages,
 } = require('../controllers/recipeController');
 const { authenticateToken } = require('../utils/authenticateToken');
 
@@ -47,5 +48,7 @@ recipeRouter.post('/ingredients', authenticateToken, searchIngredient);
 
 // CALCULATE NUTRIENTS
 recipeRouter.post('/nutrients', calculateNutrients);
+
+recipeRouter.get('/images/:id', getImages);
 
 module.exports = recipeRouter;
