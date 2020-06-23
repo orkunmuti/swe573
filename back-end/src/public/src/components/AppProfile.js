@@ -23,6 +23,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import api from '../constants/api';
 import axios from 'axios';
 import UserContext from '../context/UserContext';
+import { toast } from 'react-toastify';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -155,7 +156,17 @@ export const AppProfile = ({ title }) => {
     user.userAllergy = allergies;
 
     let result = await axios.put(api.updateUser + userId, { user });
-    console.log(result);
+    if (result.status === 200) {
+      toast.success('Profile update is successful.', {
+        position: 'bottom-center',
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
   };
 
   return (
