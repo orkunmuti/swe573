@@ -20,6 +20,7 @@ const getFoodAPI = async (id) => {
 };
 
 const searchFoodAPI = async (query) => {
+  console.log('query', query);
   const { filter, pageNumber = 1 } = query;
   let url = `${usdaAPI.searchFoods}${apiKey}`;
 

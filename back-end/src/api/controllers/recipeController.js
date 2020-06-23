@@ -270,13 +270,40 @@ const deleteRecipe = async (req, res, next) => {
 };
 
 const getRecipe = async (req, res, next) => {
-  res.json('Hello?');
+  try {
+    let recipeId = req.params.id;
+    recipeId = Number(recipeId);
+
+    let [recipe] = await knex('recipes').where('id', recipeId);
+
+    let ingredients = await knex('recipe_ingredients').where(
+      'recipe_id',
+      recipeId,
+    );
+    recipe.ingredients = ingredients;
+
+    for (let j = 0; j < ingredients.length; j++) {
+      let ingredient = ingredients[j];
+
+      let foodPortions = await knex('ingredient_portions').where({
+        id: ingredient.id,
+        recipe_id: recipeId,
+      });
+      ingredient.foodPortions = foodPortions;
+    }
+
+    let [user] = await knex('users').where('id', recipe.createdBy);
+    recipe.user = {};
+    recipe.user.avatar = user.image;
+    res.status(200).send(recipe);
+  } catch (error) {
+    res.status(400).send('Cannot get recipe.');
+  }
 };
 
 const getRecipes = async (req, res, next) => {
   try {
     let recipes = await knex('recipes');
-    console.log(recipes.length);
 
     for (let i = 0; i < recipes.length; i++) {
       let recipe = recipes[i];
@@ -427,11 +454,6 @@ const calculateNutrients = async (req, res, next) => {
   res.send(result);
 };
 
-const getImages = async (req, res, next) => {
-  let imageName = req.params.id;
-  res.sendFile(path.join(__dirname, '../../public/images', imageName));
-};
-
 module.exports = {
   createRecipe,
   updateRecipe,
@@ -444,5 +466,4 @@ module.exports = {
   getIngredient,
   searchIngredient,
   calculateNutrients,
-  getImages,
 };

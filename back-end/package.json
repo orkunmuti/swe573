@@ -5,13 +5,14 @@
   "main": "src/app.js",
   "scripts": {
     "start": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha src/test/task.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^4.0.1",
     "body-parser": "^1.19.0",
+    "chai-things": "^0.2.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
@@ -27,6 +28,9 @@
     "uuid": "^8.1.0"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "mocha": "^8.0.1",
     "nodemon": "^2.0.3"
   }
 }
