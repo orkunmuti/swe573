@@ -122,7 +122,7 @@ export const AppProfile = ({ title }) => {
 
   const renderAllergies = () => {
     return (
-      allergies.length > 0 && (
+      allergies?.length > 0 && (
         <div
           style={{
             display: 'flex',
