@@ -65,10 +65,14 @@ export const AppDrop = (props) => {
           </div>
         ) : (
           <div>
-            <img
-              style={props.imgStyle}
-              src={props.api === true ? api.images + props.image : props.image}
-            />
+            <div style={props.imgStyle}>
+              <img
+                src={
+                  props.api === true ? api.images + props.image : props.image
+                }
+              />
+            </div>
+
             <a
               onClick={() => removeImage()}
               style={{

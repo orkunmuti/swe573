@@ -183,7 +183,10 @@ const updateUser = async (req, res, next) => {
     }
 
     let result = await knex('users').where('id', userId).update(user);
-    console.log(result, 'result', user);
+    if (userAllergy === undefined) {
+      res.status(200).send('Profile update is successful.');
+      return;
+    }
 
     let dbAllergies = await knex('user_allergy')
       .where({ user_id: userId })

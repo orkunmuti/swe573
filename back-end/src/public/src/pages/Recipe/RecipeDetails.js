@@ -63,7 +63,9 @@ export const RecipeDetails = (props) => {
   const renderRecipeDetails = () => {
     return (
       <div style={styles.recipeDetailContainer}>
-        <img style={styles.recipeImage} src={api.images + data?.image} />
+        <div style={styles.recipeImage}>
+          <img src={api.images + data?.image} />
+        </div>
         <div style={styles.recipeTitle}>{data.title}</div>
         {/* <AppRating style={styles.recipeRating} rating={data.rating} /> */}
         {renderSubDetails(data)}
@@ -344,16 +346,22 @@ const styles = {
     borderRadius: '10px',
   },
   recipeImage: {
-    alignSelf: 'flex-center',
-
-    overflow: 'hidden',
-    width: '30rem',
+    width: '-webkit-fill-available',
+    height: '20rem',
+    color: 'black',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: '2rem',
     borderRadius: '5px',
+    overflow: 'hidden',
   },
   recipeTitle: {
     marginTop: '1.5rem',
     fontSize: 30,
     letterSpacing: '1px',
+    lineHeight: '2rem',
   },
   recipeRating: {
     marginTop: '1rem',

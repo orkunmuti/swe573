@@ -15,7 +15,7 @@ import emptyplate from '../../assets/empty_plate.jpg';
 export const RecipeList = (props) => {
   const [recipeData, setRecipeData] = useState([]);
   const [totalData, setTotalData] = useState([]);
-  const [searchInput, setSearchInput] = useState([]);
+  const [searchInput, setSearchInput] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [user, setUser] = useState({});
   const [excludeAlg, setExcludeAlg] = useState(false);
@@ -51,14 +51,16 @@ export const RecipeList = (props) => {
   function filterIt(array, value) {
     return array.filter(
       (data) =>
-        JSON.stringify(data).toLowerCase().indexOf(value.toLowerCase()) !== -1,
+        JSON.stringify(data)?.toLowerCase()?.indexOf(value?.toLowerCase()) !==
+        -1,
     );
   }
 
   function excludeFilter(array, value) {
     return array.filter(
       (data) =>
-        JSON.stringify(data).toLowerCase().indexOf(value.toLowerCase()) === -1,
+        JSON.stringify(data)?.toLowerCase()?.indexOf(value?.toLowerCase()) ===
+        -1,
     );
   }
 

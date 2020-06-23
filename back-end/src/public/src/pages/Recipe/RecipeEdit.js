@@ -789,10 +789,8 @@ const styles = {
     marginTop: '2rem',
   },
   recipeImage: {
-    minWidth: '25rem',
-    maxWidth: '30rem',
-    minHeight: '15rem',
-    maxHeight: '20rem',
+    width: '30rem',
+    height: '20rem',
     color: 'black',
     display: 'flex',
     flexDirection: 'row',
@@ -800,6 +798,7 @@ const styles = {
     justifyContent: 'center',
     marginTop: '2rem',
     borderRadius: '5px',
+    overflow: 'hidden',
   },
 
   subHeader: {

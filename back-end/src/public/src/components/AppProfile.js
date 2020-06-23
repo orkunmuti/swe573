@@ -69,7 +69,10 @@ export const AppProfile = ({ title }) => {
         setCity(dbUser.city);
         setState(dbUser.state);
         setImage(dbUser.image);
-        setAllergies(dbUser.userAllergy);
+        if (dbUser?.userAllergy) {
+          setAllergies(dbUser.userAllergy);
+        }
+
         setEmail(dbUser.email);
         if (dbUser.image !== '') {
           setImageApi(true);
@@ -134,6 +137,7 @@ export const AppProfile = ({ title }) => {
           {allergies?.map((allergy, index) => {
             return (
               <Chip
+                key={allergy}
                 label={allergy}
                 style={{ margin: 10, maxWidth: '80%' }}
                 onDelete={() => onRemoveAllergy(index)}
@@ -309,7 +313,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: '50%',
-    marginTop: 5,
+    overflow: 'hidden',
     border: '1px solid #800000',
   },
   dropImage: {

@@ -4,7 +4,7 @@ import { Route, Redirect } from 'react-router-dom';
 import auth from '../utils/auth';
 
 const ProtectedRoute = ({ component: Component, ...rest }) => {
-  const { user } = useContext(UserContext);
+  const user = localStorage.getItem('chewyToken');
 
   return (
     <Route
